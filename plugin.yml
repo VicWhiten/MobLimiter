@@ -4,3 +4,15 @@ description: Allows you to set a mob limit on your server
 author: VicWhiten
 website: www.github.com/VicWhiten
 main: com.bukkit.vicwhiten.moblimiter.MobLimiter
+commands:
+  mobmax:
+    description: displays and sets the maximum amount of mobs
+    usage: |
+           /<command> [amount]
+           Example: /<command> - displays the mob max
+           Example: /<command> 15 - sets the mob max to 15
+  purgemobs:
+    description: kills all mobs on the world
+    usage:  |
+            /<command>
+            Example: /<command> kills all mobs on your current world
