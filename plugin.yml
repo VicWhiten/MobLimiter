@@ -1,0 +1,6 @@
+name: MobLimiter
+version: 1.0
+description: Allows you to set a mob limit on your server
+author: VicWhiten
+website: www.github.com/VicWhiten
+main: com.bukkit.vicwhiten.moblimiter.MobLimiter
