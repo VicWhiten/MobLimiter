@@ -1,5 +1,6 @@
 package com.bukkit.vicwhiten.moblimiter;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.anjocaido.groupmanager.GroupManager;
@@ -26,6 +27,7 @@ public class MobLimiter extends JavaPlugin
 {
 
 	private final MobLimiterEntityListener entityListener = new MobLimiterEntityListener(this);
+	public List<String> mobBlacklist;
 	public int mobMax;
 	public Configuration config;
 	public GroupManager gm;
@@ -50,7 +52,8 @@ public class MobLimiter extends JavaPlugin
 	        } 
 	 
 		config = this.getConfiguration();
-
+		setupMobMax();
+		setupBlacklist();
 		pm.registerEvent(Event.Type.CREATURE_SPAWN, this.entityListener, Event.Priority.Normal, this);
 		getCommand("mobmax").setExecutor(new SetMaxCommand(this));
 		getCommand("purgemobs").setExecutor(new PurgeCommand(this));
@@ -89,13 +92,26 @@ public class MobLimiter extends JavaPlugin
 	
 	public void setupMobMax()
 	{
+		config.load();
 		mobMax = config.getInt("mob-max", -1);
+	}
+	
+	public void setupBlacklist()
+	{
+		config.load();
+		String blacklist = config.getString("mob-blacklist");
+		mobBlacklist = Arrays.asList(blacklist.split(" "));
+		for(String mob : mobBlacklist)
+		{
+			mob = mob.toLowerCase();
+		}
 	}
 	
 	public void setMobMax(int newMax)
 	{
 		mobMax = newMax;
 		config.setProperty("mob-max", newMax);
+		config.save();
 	}
 	
 	public int getMobMax()
@@ -124,6 +140,11 @@ public class MobLimiter extends JavaPlugin
 		public void onCreatureSpawn(CreatureSpawnEvent event)
 		{	
 			if(plugin.mobMax > -1 && plugin.getMobAmount(event.getEntity().getWorld()) >= plugin.mobMax)
+			{
+				
+				event.setCancelled(true);
+			}
+			if(plugin.mobBlacklist.contains(event.getCreatureType().getName().toLowerCase()))
 			{
 				event.setCancelled(true);
 			}
@@ -158,6 +179,7 @@ public class MobLimiter extends JavaPlugin
 	    			if(newMax >=0)
 	    			{
 	    				plugin.setMobMax(newMax);
+	    				sender.sendMessage("MobMax set to " + newMax);
 	    				return true;
 	    			}else return false;
 	    		}catch(Exception e){
@@ -189,6 +211,7 @@ public class MobLimiter extends JavaPlugin
 	    	}
 	    	Player p = (Player)sender;
 	    	plugin.purgeMobs(p.getWorld());
+	    	sender.sendMessage("All mobs purged.");
 	    	return true;
 	    }
 	    
