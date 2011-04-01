@@ -21,6 +21,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
 
+import com.nijikokun.bukkit.Permissions.Permissions;
+
 
 
 public class MobLimiter extends JavaPlugin
@@ -31,6 +33,7 @@ public class MobLimiter extends JavaPlugin
 	public int mobMax;
 	public Configuration config;
 	public GroupManager gm;
+	public Permissions perm;
 
 	public void onDisable()
 	{
@@ -49,6 +52,14 @@ public class MobLimiter extends JavaPlugin
 	                this.getServer().getPluginManager().enablePlugin(p);
 	            }
 	            gm = (GroupManager) p;
+	        } 
+	        
+	        p = this.getServer().getPluginManager().getPlugin("Permissions");
+	        if (p != null) {
+	            if (!this.getServer().getPluginManager().isPluginEnabled(p)) {
+	                this.getServer().getPluginManager().enablePlugin(p);
+	            }
+	            perm = (Permissions) p;
 	        } 
 	 
 		config = this.getConfiguration();
@@ -152,6 +163,9 @@ public class MobLimiter extends JavaPlugin
     	}else if(gm != null)
     	{
         return gm.getWorldsHolder().getWorldPermissions(player).has(player,permission);
+    	}else if(perm != null)
+    	{
+    	return perm.getHandler().has(player, permission);
     	}else return false;
     }
 	
@@ -175,6 +189,8 @@ public class MobLimiter extends JavaPlugin
 			}
 		}
 	}
+	
+
 	
 	private class MobLimiterCommand implements CommandExecutor 
 	{
