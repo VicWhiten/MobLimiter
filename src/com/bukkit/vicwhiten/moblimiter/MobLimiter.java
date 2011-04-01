@@ -55,8 +55,7 @@ public class MobLimiter extends JavaPlugin
 		setupMobMax();
 		setupBlacklist();
 		pm.registerEvent(Event.Type.CREATURE_SPAWN, this.entityListener, Event.Priority.Normal, this);
-		getCommand("mobmax").setExecutor(new SetMaxCommand(this));
-		getCommand("purgemobs").setExecutor(new PurgeCommand(this));
+		getCommand("moblimiter").setExecutor(new MobLimiterCommand(this));
 		
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println(pdfFile.getName()+" version "+pdfFile.getVersion()+" is enabled!");
@@ -107,6 +106,32 @@ public class MobLimiter extends JavaPlugin
 		}
 	}
 	
+	public void addBlackList(String type)
+	{
+		config.load();
+		String blacklist = config.getString("mob-blacklist");
+		blacklist = blacklist + " " + type.toLowerCase();
+		config.setProperty("mob-blacklist",	blacklist);
+		mobBlacklist.add(type.toLowerCase());
+	}
+	
+	public boolean removeBlackList(String type)
+	{
+		config.load();
+		boolean wasThere = mobBlacklist.remove(type.toLowerCase());
+		if(!wasThere)
+		{
+			return false;
+		}
+		String blacklist = "";
+		for(String mob : mobBlacklist)
+		{
+			blacklist = blacklist + " " + mob;
+		}
+		config.setProperty("mob-blacklist", blacklist.trim());
+		return true;
+	}
+	
 	public void setMobMax(int newMax)
 	{
 		mobMax = newMax;
@@ -151,11 +176,11 @@ public class MobLimiter extends JavaPlugin
 		}
 	}
 	
-	private class SetMaxCommand implements CommandExecutor 
+	private class MobLimiterCommand implements CommandExecutor 
 	{
 	    private final MobLimiter plugin;
 
-	    public SetMaxCommand(MobLimiter plugin) {
+	    public MobLimiterCommand(MobLimiter plugin) {
 	        this.plugin = plugin;
 	    }
 
@@ -163,16 +188,24 @@ public class MobLimiter extends JavaPlugin
 	    		Command command, 
 	    		String label, String[] args) 
 	    {
-	    	if(!checkPermission((Player)sender, "moblimiter.setMax"))
+	    	boolean permission = false;
+	    	try{
+	    		permission = checkPermission((Player)sender, "moblimiter.sexMax");
+	    	}catch(Exception E)
+	    	{
+	    		permission = true;
+	    	}
+	    	if(!permission)
 	    	{
 	    		sender.sendMessage(ChatColor.RED + "You do not have the permissions to do this");
 	    		return true;
 	    	}
-	    	if(args.length > 1)
+	    	if(args.length < 1)
 	    	{
 	    		return false;
 	    	}
-	    	if(args.length == 1)
+	    	//setMax command
+	    	if(args.length == 2 && args[0].compareTo("setmdax") == 0)
 	    	{
 	    		try{
 	    			int newMax = Integer.parseInt(args[0]);
@@ -186,34 +219,40 @@ public class MobLimiter extends JavaPlugin
 	    			return false;
 	    		}
 	    	}
-	    	sender.sendMessage("Mob Max is set to " + plugin.mobMax);
-	    	return true;
-	    		
+	    	//purge command
+	    	if(args.length == 1 && args[0].compareTo("purge") == 0)
+	    	{
+	    		try{
+	    		Player p = (Player)sender;
+		    	plugin.purgeMobs(p.getWorld());
+		    	sender.sendMessage("All mobs purged.");
+		    	return true;
+		    	}catch(Exception E){
+		    		sender.sendMessage("Must be run ingame!");
+		    		return true;
+		    	}
+	    	}
+	    	//add to blacklist command
+	    	if(args.length == 2 && args[0].compareTo("addblacklist") == 0)
+	    	{
+	    		addBlackList(args[1]);
+	    		sender.sendMessage("Added " + args[1] + " to Blacklist");
+	    		return true;
+	    	}
+	    	if(args.length == 2 && args[0].compareTo("removeblacklist") == 0)
+	    	{
+	    		boolean didWork = removeBlackList(args[1]);
+	    		if(didWork)
+	    		{
+	    			sender.sendMessage("Added " + args[1] + " to Blacklist");
+	    			return true;
+	    		}else{
+	    			sender.sendMessage("Type not found in Blacklist");
+	    			return true;
+	    		}
+	    	}
+	    	return false;
 	    }	
 	}
 	
-	private class PurgeCommand implements CommandExecutor 
-	{
-	    private final MobLimiter plugin;
-
-	    public PurgeCommand(MobLimiter plugin) {
-	        this.plugin = plugin;
-	    }
-
-	    public boolean onCommand(CommandSender sender, 
-	    		Command command, 
-	    		String label, String[] args) 
-	    {
-	    	if(!checkPermission((Player)sender, "moblimiter.purge"))
-	    	{
-	    		sender.sendMessage(ChatColor.RED + "You do not have the permissions to do this");
-	    		return true;
-	    	}
-	    	Player p = (Player)sender;
-	    	plugin.purgeMobs(p.getWorld());
-	    	sender.sendMessage("All mobs purged.");
-	    	return true;
-	    }
-	    
-	}
 }

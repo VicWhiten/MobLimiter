@@ -5,14 +5,11 @@ author: VicWhiten
 website: www.github.com/VicWhiten
 main: com.bukkit.vicwhiten.moblimiter.MobLimiter
 commands:
-  mobmax:
-    description: displays and sets the maximum amount of mobs
+  moblimiter:
+    description: Use a MobLimiter command
     usage: |
-           /<command> [amount]
-           Example: /<command> - displays the mob max
-           Example: /<command> 15 - sets the mob max to 15
-  purgemobs:
-    description: kills all mobs on the world
-    usage:  |
-            /<command>
-            Example: /<command> kills all mobs on your current world
+           /<command> [subcommand] [type]
+           Example: /<command> setmax 1000- sets the mob max to 1000
+           Example: /<command> purge - removes all mobs/creatures
+           Example: /<command> addblacklist pig - blacklists pigs from your server
+           Example: /<command> removeblacklist pig - allows pigs to spawn on the server
