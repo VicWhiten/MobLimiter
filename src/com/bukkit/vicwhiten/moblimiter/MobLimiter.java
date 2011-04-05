@@ -1,5 +1,6 @@
 package com.bukkit.vicwhiten.moblimiter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -110,7 +111,12 @@ public class MobLimiter extends JavaPlugin
 	{
 		config.load();
 		String blacklist = config.getString("mob-blacklist");
+		try{
 		mobBlacklist = Arrays.asList(blacklist.split(" "));
+		}catch(Exception e)
+		{
+			mobBlacklist = new ArrayList<String>();
+		}
 		for(String mob : mobBlacklist)
 		{
 			mob = mob.toLowerCase();
